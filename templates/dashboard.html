@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VIT StudyBuddy{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="brand-text">
+                <h1>VIT StudyBuddy</h1>
+                <p>Chennai Campus</p>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#dashboard" class="nav-link active">Dashboard</a>
+            <a href="#find-buddies" class="nav-link">Find Buddies</a>
+            <a href="#notes" class="nav-link">Notes</a>
+            <a href="#timetable" class="nav-link">Timetable</a>
+            <a href="#chatbot" class="nav-link">AI Helper</a>
+        </div>
+        
+        <div class="nav-actions">
+            <button class="btn-icon">
+                <i class="fas fa-bell"></i>
+            </button>
+            <div class="user-menu">
+                <div class="user-avatar">
+                    {{ user.full_name[0].upper() }}
+                </div>
+                <div class="dropdown">
+                    <button onclick="logout()" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="welcome-content">
+            <div class="welcome-info">
+                <h2>Welcome back, {{ user.full_name }}!</h2>
+                <p>Ready to find your perfect study partner?</p>
+                <div class="user-badges">
+                    <span class="badge">{{ user.program }}</span>
+                    <span class="badge">{{ user.year }} Year</span>
+                </div>
+            </div>
+            <div class="study-stats">
+                <div class="stat-card">
+                    <div class="stat-number">47</div>
+                    <div class="stat-label">Study Hours This Week</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <div class="action-card" onclick="showStudyRequestModal()">
+            <div class="action-icon primary">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>Find Study Buddy</h3>
+            <p>Discover students studying similar topics</p>
+        </div>
+        
+        <div class="action-card" onclick="showUploadModal()">
+            <div class="action-icon secondary">
+                <i class="fas fa-upload"></i>
+            </div>
+            <h3>Upload Notes</h3>
+            <p>Share your study materials</p>
+        </div>
+        
+        <div class="action-card" onclick="toggleChatbot()">
+            <div class="action-icon accent">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3>AI Assistant</h3>
+            <p>Get study resources and help</p>
+        </div>
+        
+        <div class="action-card" onclick="showTimetableModal()">
+            <div class="action-icon purple">
+                <i class="fas fa-calendar"></i>
+            </div>
+            <h3>My Timetable</h3>
+            <p>Manage your schedule</p>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <!-- Study Buddies Section -->
+        <div class="main-content">
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Find Study Buddies</h3>
+                    <button class="btn btn-outline" onclick="showStudyRequestModal()">Create Request</button>
+                </div>
+                
+                <div class="search-filters">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search by subject or topic...">
+                    </div>
+                    <div class="filter-tags">
+                        <button class="filter-tag active" data-subject="">All</button>
+                        <button class="filter-tag" data-subject="Data Structures">Data Structures</button>
+                        <button class="filter-tag" data-subject="Mathematics">Mathematics</button>
+                        <button class="filter-tag" data-subject="Web Development">Web Development</button>
+                    </div>
+                </div>
+                
+                <div id="studyBuddiesList" class="study-buddies-list">
+                    {% for request in study_requests %}
+                    <div class="buddy-card">
+                        <div class="buddy-avatar">{{ request.full_name[0].upper() }}</div>
+                        <div class="buddy-info">
+                            <div class="buddy-header">
+                                <h4>{{ request.full_name }}</h4>
+                                <span class="time-ago">{{ request.created_at }}</span>
+                            </div>
+                            <div class="buddy-meta">
+                                <span>{{ request.program }} • {{ request.year }} Year</span>
+                                <span class="status online">Online</span>
+                            </div>
+                            <p class="buddy-description">{{ request.description or 'Looking for study partner' }}</p>
+                            <div class="buddy-tags">
+                                <span class="tag primary">{{ request.subject }}</span>
+                                <span class="tag secondary">{{ request.topic }}</span>
+                                <span class="tag location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ request.location }}
+                                </span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-message"></i>
+                            Connect
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Notes Section -->
+            <div class="section-card" id="notes">
+                <div class="section-header">
+                    <h3>Study Notes & Resources</h3>
+                    <button class="btn btn-secondary" onclick="showUploadModal()">
+                        <i class="fas fa-upload"></i>
+                        Upload Notes
+                    </button>
+                </div>
+                
+                <div class="notes-tabs">
+                    <button class="tab-btn active" data-subject="">All Subjects</button>
+                    <button class="tab-btn" data-subject="Computer Science">Computer Science</button>
+                    <button class="tab-btn" data-subject="Mathematics">Mathematics</button>
+                    <button class="tab-btn" data-subject="Database Systems">Database Systems</button>
+                </div>
+                
+                <div class="notes-grid">
+                    {% for note in notes %}
+                    <div class="note-card">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="note-content">
+                            <h4>{{ note.title }}</h4>
+                            <p>{{ note.description or 'No description' }}</p>
+                            <div class="note-meta">
+                                <span>By {{ note.uploader_name }}</span>
+                                <div class="note-stats">
+                                    <span><i class="fas fa-download"></i> {{ note.downloads }}</span>
+                                    <span><i class="fas fa-heart"></i> {{ note.likes }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm">Download</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Active Study Sessions -->
+            <div class="sidebar-card">
+                <h3>Active Study Sessions</h3>
+                <div class="empty-state">
+                    <i class="fas fa-calendar"></i>
+                    <p>No active sessions</p>
+                    <small>Join a study group to see active sessions</small>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="sidebar-card">
+                <h3>Your Stats</h3>
+                <div class="stats-list">
+                    <div class="stat-item">
+                        <span>Study Connections</span>
+                        <span class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Notes Shared</span>
+                        <span class="stat-value">{{ notes|length }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Study Sessions</span>
+                        <span class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Hours This Week</span>
+                        <span class="stat-value highlight">47</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timetable Section -->
+    <div class="section-card" id="timetable">
+        <div class="section-header">
+            <h3>My Timetable</h3>
+            <button class="btn btn-outline" onclick="showTimetableModal()">
+                <i class="fas fa-edit"></i>
+                Edit Schedule
+            </button>
+        </div>
+        
+        <div class="timetable-container">
+            <div class="timetable-grid">
+                <div class="time-header">Time</div>
+                <div class="day-header">Monday</div>
+                <div class="day-header">Tuesday</div>
+                <div class="day-header">Wednesday</div>
+                <div class="day-header">Thursday</div>
+                <div class="day-header">Friday</div>
+                
+                <!-- Time slots will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div id="studyRequestModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create Study Request</h2>
+            <button class="modal-close" onclick="closeModal('studyRequestModal')">&times;</button>
+        </div>
+        <form id="studyRequestForm">
+            <div class="form-group">
+                <label for="requestSubject">Subject</label>
+                <input type="text" id="requestSubject" name="subject" required>
+            </div>
+            <div class="form-group">
+                <label for="requestTopic">Topic</label>
+                <input type="text" id="requestTopic" name="topic" required>
+            </div>
+            <div class="form-group">
+                <label for="requestLocation">Location</label>
+                <select id="requestLocation" name="location" required>
+                    <option value="">Select location</option>
+                    <option value="Central Library">Central Library</option>
+                    <option value="Block A Study Rooms">Block A Study Rooms</option>
+                    <option value="Block B Study Rooms">Block B Study Rooms</option>
+                    <option value="Tech Park">Tech Park</option>
+                    <option value="Online/Virtual">Online/Virtual</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="requestDescription">Description</label>
+                <textarea id="requestDescription" name="description" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Request</button>
+        </form>
+    </div>
+</div>
+
+<div id="uploadModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Upload Study Notes</h2>
+            <button class="modal-close" onclick="closeModal('uploadModal')">&times;</button>
+        </div>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="noteTitle">Title</label>
+                <input type="text" id="noteTitle" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="noteSubject">Subject</label>
+                <select id="noteSubject" name="subject" required>
+                    <option value="">Select subject</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Database Systems">Database Systems</option>
+                    <option value="Web Development">Web Development</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="noteDescription">Description</label>
+                <textarea id="noteDescription" name="description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="noteFile">File</label>
+                <input type="file" id="noteFile" name="file" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+    </div>
+</div>
+
+<!-- Chatbot Widget -->
+<div id="chatbot" class="chatbot-widget">
+    <button id="chatbotToggle" class="chatbot-toggle" onclick="toggleChatbot()">
+        <i class="fas fa-robot"></i>
+    </button>
+    
+    <div id="chatbotPanel" class="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-info">
+                <div class="chatbot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <h4>Study Assistant</h4>
+                    <p>Online • Ready to help</p>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    Hi! I'm your AI study assistant. I can help you find study resources, recommend materials, or answer questions about your courses. What would you like to know?
+                </div>
+            </div>
+        </div>
+        
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Ask me anything...">
+            <button onclick="sendMessage()" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
