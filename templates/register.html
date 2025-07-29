@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Register - VIT StudyBuddy{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card register-card">
+        <div class="auth-header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1>Join VIT StudyBuddy</h1>
+            <p>Create your account to find study partners at VIT Chennai</p>
+        </div>
+        
+        <form id="registerForm" class="auth-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@vitstudent.ac.in" required>
+                </div>
+                <div class="form-group">
+                    <label for="registrationNumber">VIT Registration Number</label>
+                    <input type="text" id="registrationNumber" name="registrationNumber" placeholder="e.g., 20BCE1234" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-input">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-input">
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="program">Program</label>
+                    <select id="program" name="program" required>
+                        <option value="">Select your program</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="year">Year</label>
+                    <select id="year" name="year" required>
+                        <option value="">Select year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="preferredLocation">Preferred Study Location</label>
+                <select id="preferredLocation" name="preferredLocation">
+                    <option value="">Select location</option>
+                    <option value="Central Library">Central Library</option>
+                    <option value="Block A Study Rooms">Block A Study Rooms</option>
+                    <option value="Block B Study Rooms">Block B Study Rooms</option>
+                    <option value="Tech Park">Tech Park</option>
+                    <option value="Cafeteria Area">Cafeteria Area</option>
+                    <option value="Online/Virtual">Online/Virtual</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Current Subjects</label>
+                <div class="checkbox-grid">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="subjects" value="Data Structures">
+                        <span>Data Structures</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="subjects" value="Mathematics">
+                        <span>Mathematics</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="subjects" value="Database Systems">
+                        <span>Database Systems</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="subjects" value="Web Development">
+                        <span>Web Development</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="subjects" value="Machine Learning">
+                        <span>Machine Learning</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="subjects" value="Computer Networks">
+                        <span>Computer Networks</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="studyTopics">Study Topics of Interest</label>
+                <textarea id="studyTopics" name="studyTopics" placeholder="e.g., Machine Learning, Algorithms, React.js, Linear Algebra..." rows="3"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create Account</button>
+            
+            <p class="auth-link">
+                Already have an account? <a href="/">Sign in</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const password = formData.get('password');
+    const confirmPassword = formData.get('confirmPassword');
+    
+    if (password !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+    
+    // Get selected subjects
+    const subjects = [];
+    document.querySelectorAll('input[name="subjects"]:checked').forEach(checkbox => {
+        subjects.push(checkbox.value);
+    });
+    
+    const data = {
+        fullName: formData.get('fullName'),
+        username: formData.get('username'),
+        email: formData.get('email'),
+        registrationNumber: formData.get('registrationNumber'),
+        password: password,
+        program: formData.get('program'),
+        year: parseInt(formData.get('year')),
+        preferredLocation: formData.get('preferredLocation'),
+        subjects: subjects,
+        studyTopics: formData.get('studyTopics')
+    };
+    
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('Account created successfully!', 'success');
+            window.location.href = '/dashboard';
+        } else {
+            showToast(result.message, 'error');
+        }
+    } catch (error) {
+        showToast('Registration failed. Please try again.', 'error');
+    }
+});
+</script>
+{% endblock %}
