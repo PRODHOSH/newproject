@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Buddy Finder | Next-Gen Study Partner Matching</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.net.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6c63ff;
+            --secondary: #4a44c9;
+            --accent: #ff6b6b;
+            --neon: #00f3ff;
+            --dark: #0f0c29;
+            --darker: #080518;
+            --light: #f0f0f5;
+            --gradient-start: #4f46e5;
+            --gradient-end: #7c3aed;
+            --glow: 0 0 15px rgba(108, 99, 255, 0.7);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: radial-gradient(circle at center, #0f0c29 0%, #080518 70%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+            perspective: 1000px;
+        }
+
+        #vanta-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header & Navigation */
+        header {
+            padding: 25px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+            background: rgba(8, 5, 24, 0.85);
+            border-bottom: 1px solid rgba(108, 99, 255, 0.3);
+            transform: translateZ(20px);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 32px;
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon);
+            transition: all 0.4s ease;
+        }
+
+        .logo:hover {
+            text-shadow: 0 0 20px var(--neon), 0 0 30px rgba(0, 243, 255, 0.6);
+        }
+
+        .logo i {
+            color: var(--neon);
+            font-size: 36px;
+            filter: drop-shadow(0 0 8px var(--neon));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--neon);
+            transition: width 0.3s ease;
+            box-shadow: var(--glow);
+        }
+
+        .nav-links a:hover {
+            color: var(--neon);
+        }
+
+        .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        .cta-button {
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 25px rgba(108, 99, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(108, 99, 255, 0.8), 0 0 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            gap: 80px;
+        }
+
+        .hero-text {
+            flex: 1;
+            animation: fadeInUp 1.2s ease-out 0.2s forwards;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .hero-image {
+            flex: 1;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .hero h1 {
+            font-size: 5.5rem;
+            line-height: 1.05;
+            margin-bottom: 30px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff, #a5b4fc, #00f3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            text-shadow: 0 0 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .hero h1 span {
+            display: block;
+            font-size: 6rem;
+            background: linear-gradient(90deg, #ff6b6b, #ffa502, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+            margin-top: 10px;
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            max-width: 650px;
+            color: #c1c1ff;
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .secondary-button {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--primary);
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .secondary-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            transition: width 0.5s ease;
+            z-index: -1;
+        }
+
+        .secondary-button:hover {
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .secondary-button:hover::before {
+            width: 100%;
+        }
+
+        .hero-cube {
+            width: 500px;
+            height: 500px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCube 20s infinite linear;
+            margin: 0 auto;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 30, 60, 0.3);
+            border: 2px solid rgba(108, 99, 255, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 50px rgba(108, 99, 255, 0.2);
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .cube-face::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(108, 99, 255, 0.4), transparent 30%);
+            animation: rotate 4s linear infinite;
+        }
+
+        .cube-face-inner {
+            position: relative;
+            width: 95%;
+            height: 95%;
+            background: rgba(15, 12, 41, 0.85);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .cube-face:nth-child(1) { transform: translateZ(250px); }
+        .cube-face:nth-child(2) { transform: rotateY(180deg) translateZ(250px); }
+        .cube-face:nth-child(3) { transform: rotateY(90deg) translateZ(250px); }
+        .cube-face:nth-child(4) { transform: rotateY(-90deg) translateZ(250px); }
+        .cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(250px); }
+        .cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(250px); }
+
+        .cube-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            color: var(--neon);
+            filter: drop-shadow(0 0 10px var(--neon));
+        }
+
+        .cube-text {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .cube-subtext {
+            font-size: 18px;
+            color: #c1c1ff;
+            font-weight: 300;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 150px 0 100px;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 100px;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 4rem;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .section-title p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: #c1c1ff;
+            font-size: 1.3rem;
+            font-weight: 300;
+            line-height: 1.8;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 50px;
+        }
+
+        .feature-card {
+            background: rgba(30, 30, 60, 0.2);
+            border-radius: 25px;
+            padding: 50px 40px;
+            text-align: center;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(108, 99, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transform: translateZ(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-20px) translateZ(30px);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), 0 0 40px rgba(108, 99, 255, 0.3);
+            border-color: rgba(108, 99, 255, 0.5);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .feature-icon {
+            width: 120px;
+            height: 120px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 35px;
+            font-size: 50px;
+            color: var(--neon);
+            transition: all 0.5s ease;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: rotateY(180deg) scale(1.1);
+            color: var(--accent);
+            box-shadow: 0 0 40px rgba(108, 99, 255, 0.5);
+        }
+
+        .feature-card h3 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .feature-card p {
+            color: #c1c1ff;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 150px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonials::before {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            top: -400px;
+            right: -400px;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .testimonial-card {
+            background: rgba(30, 30, 60, 0.3);
+            border-radius: 25px;
+            padding: 40px;
+            position: relative;
+            border: 1px solid rgba(108, 99, 255, 0.2);
+            transition: all 0.5s ease;
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-15px) rotateX(5deg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(108, 99, 255, 0.2);
+            border-color: rgba(108, 99, 255, 0.5);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 32px;
+            margin-right: 20px;
+            box-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+        }
+
+        .user-info h4 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .user-info p {
+            color: var(--neon);
+            font-size: 1.1rem;
+        }
+
+        .quote {
+            font-style: italic;
+            color: #c1c1ff;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .quote::before {
+            content: """;
+            position: absolute;
+            top: -30px;
+            left: -15px;
+            font-size: 80px;
+            color: rgba(108, 99, 255, 0.2);
+            font-family: serif;
+        }
+
+        .stars {
+            color: #ffd700;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 150px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-content {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(30, 30, 60, 0.3);
+            padding: 80px 60px;
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(108, 99, 255, 0.3);
+            backdrop-filter: blur(15px);
+            transform: perspective(1000px) rotateX(5deg);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4), 0 0 50px rgba(108, 99, 255, 0.2);
+        }
+
+        .cta-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(108, 99, 255, 0.3), transparent 30%);
+            animation: rotate 6s linear infinite;
+            z-index: -1;
+        }
+
+        .cta-content h2 {
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff, #a5b4fc, #00f3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            text-shadow: 0 0 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .cta-content p {
+            margin-bottom: 50px;
+            font-size: 1.4rem;
+            color: #c1c1ff;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(5, 5, 15, 0.95);
+            padding: 100px 0 50px;
+            position: relative;
+            transform: translateZ(10px);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+            padding-bottom: 15px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 70px;
+            height: 4px;
+            background: var(--neon);
+            box-shadow: 0 0 10px var(--neon);
+        }
+
+        .footer-column p {
+            color: #c1c1ff;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 15px;
+        }
+
+        .footer-column ul li a {
+            color: #c1c1ff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            display: block;
+            padding: 8px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .footer-column ul li a::before {
+            content: '»';
+            position: absolute;
+            left: 0;
+            color: var(--neon);
+            transition: all 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--neon);
+            padding-left: 35px;
+        }
+
+        .footer-column ul li a:hover::before {
+            left: 10px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .social-links a {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(108, 99, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.4s ease;
+            font-size: 24px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(108, 99, 255, 0.3);
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            transition: height 0.4s ease;
+            z-index: -1;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 25px rgba(108, 99, 255, 0.5);
+        }
+
+        .social-links a:hover::before {
+            height: 100%;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #c1c1ff;
+            font-size: 1.1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes rotateCube {
+            0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Floating elements */
+        .floating {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            opacity: 0.3;
+            filter: blur(40px);
+            z-index: -1;
+        }
+
+        .floating:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            top: 10%;
+            left: 5%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .floating:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            bottom: 20%;
+            right: 10%;
+            animation: float 18s infinite ease-in-out;
+        }
+
+        .floating:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            top: 40%;
+            right: 20%;
+            animation: float 12s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(0, -80px); }
+            75% { transform: translate(-50px, -30px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero-text {
+                margin-bottom: 80px;
+            }
+            
+            .hero h1 {
+                font-size: 4.5rem;
+            }
+            
+            .hero h1 span {
+                font-size: 5rem;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .hero-cube {
+                width: 400px;
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+            
+            .hero h1 span {
+                font-size: 4rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .section-title h2 {
+                font-size: 3rem;
+            }
+            
+            .cta-content h2 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-cube {
+                width: 300px;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Vanta.js Background -->
+    <div id="vanta-bg"></div>
+    
+    <!-- Floating Elements -->
+    <div class="floating"></div>
+    <div class="floating"></div>
+    <div class="floating"></div>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">
+                    <i class="fas fa-brain"></i>
+                    STUDYBUDDY
+                </a>
+                <div class="nav-links">
+                    <a href="#">Home</a>
+                    <a href="#">Features</a>
+                    <a href="#">How It Works</a>
+                    <a href="#">Testimonials</a>
+                    <a href="#">Pricing</a>
+                </div>
+                <button class="cta-button">Get Started</button>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Find Your Perfect <span>Study Buddy</span></h1>
+                    <p>Revolutionizing the way students connect. Our AI-powered platform matches you with ideal study partners based on your subjects, schedule, and learning style. Experience collaborative learning like never before.</p>
+                    <div class="hero-buttons">
+                        <button class="cta-button">Start Matching Now</button>
+                        <button class="secondary-button">See How It Works</button>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="hero-cube">
+                        <div class="cube-face">
+                            <div class="cube-face-inner">
+                                <i class="fas fa-robot cube-icon"></i>
+                                <div class="cube-text">AI Matching</div>
+                                <div class="cube-subtext">Advanced algorithm finds your perfect study partner</div>
+                            </div>
+                        </div>
+                        <div class="cube-face">
+                            <div class="cube-face-inner">
+                                <i class="fas fa-video cube-icon"></i>
+                                <div class="cube-text">Virtual Rooms</div>
+                                <div class="cube-subtext">Study together in immersive virtual environments</div>
+                            </div>
+                        </div>
+                        <div class="cube-face">
+                            <div class="cube-face-inner">
+                                <i class="fas fa-chart-line cube-icon"></i>
+                                <div class="cube-text">Progress Tracking</div>
+                                <div class="cube-subtext">Monitor your learning journey with smart analytics</div>
+                            </div>
+                        </div>
+                        <div class="cube-face">
+                            <div class="cube-face-inner">
+                                <i class="fas fa-users cube-icon"></i>
+                                <div class="cube-text">Community</div>
+                                <div class="cube-subtext">Join thousands of students worldwide</div>
+                            </div>
+                        </div>
+                        <div class="cube-face">
+                            <div class="cube-face-inner">
+                                <i class="fas fa-shield-alt cube-icon"></i>
+                                <div class="cube-text">Secure</div>
+                                <div class="cube-subtext">Your data and privacy are our top priority</div>
+                            </div>
+                        </div>
+                        <div class="cube-face">
+                            <div class="cube-face-inner">
+                                <i class="fas fa-calendar-alt cube-icon"></i>
+                                <div class="cube-text">Scheduling</div>
+                                <div class="cube-subtext">Sync calendars and never miss a study session</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Revolutionary Features</h2>
+                <p>Study Buddy Finder combines cutting-edge technology with educational psychology to create the ultimate study partner matching platform</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h3>AI Compatibility</h3>
+                    <p>Our neural network analyzes 127 factors to find study partners who match your learning style, schedule, and academic goals.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-vr-cardboard"></i>
+                    </div>
+                    <h3>Immersive VR</h3>
+                    <p>Study together in customizable virtual environments with spatial audio, interactive whiteboards, and resource sharing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Focus Enhancer</h3>
+                    <p>Proprietary technology minimizes distractions and optimizes study sessions for maximum knowledge retention.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-time Sync</h3>
+                    <p>Simultaneously edit documents, share resources, and solve problems together with zero latency.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-network"></i>
+                    </div>
+                    <h3>Knowledge Mapping</h3>
+                    <p>Visualize your learning progress and identify knowledge gaps with our interactive cognitive mapping system.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3>Academic Integrity</h3>
+                    <p>Advanced monitoring ensures all collaboration maintains the highest academic standards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>Transformative Results</h2>
+                <p>Hear from students who revolutionized their learning experience</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="avatar">S</div>
+                        <div class="user-info">
+                            <h4>Sarah Johnson</h4>
+                            <p>MIT Computer Science</p>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        "Finding study partners for quantum computing was impossible until Study Buddy Finder. The AI matching connected me with two brilliant students across the globe. We aced the course together!"
+                    </div>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="avatar">M</div>
+                        <div class="user-info">
+                            <h4>Michael Chen</h4>
+                            <p>Stanford Medical School</p>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        "The VR anatomy lab saved my semester. Studying complex systems with a partner in 3D space helped me visualize concepts that textbooks couldn't explain. My grades improved by 2 letter grades!"
+                    </div>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="avatar">E</div>
+                        <div class="user-info">
+                            <h4>Emma Rodriguez</h4>
+                            <p>Harvard Business School</p>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        "I was struggling with advanced statistics until Study Buddy Finder connected me with a PhD candidate who explained concepts in ways I could understand. The progress tracking showed exactly where I needed to focus."
+                    </div>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Revolutionize Your Learning?</h2>
+                <p>Join over 500,000 students from top universities who are achieving academic excellence through perfect study partnerships</p>
+                <div class="cta-buttons">
+                    <button class="cta-button">Create Free Account</button>
+                    <button class="secondary-button">Schedule a Demo</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>StudyBuddy Finder</h3>
+                    <p>The next generation of academic collaboration. Harnessing AI to create perfect study partnerships for unprecedented learning outcomes.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Platform</h3>
+                    <ul>
+                        <li><a href="#">How It Works</a></li>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Success Stories</a></li>
+                        <li><a href="#">For Institutions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Study Techniques</a></li>
+                        <li><a href="#">Academic Research</a></li>
+                        <li><a href="#">Learning Strategies</a></li>
+                        <li><a href="#">Webinars</a></li>
+                        <li><a href="#">Partner Programs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li><a href="#">support@studybuddyfinder.io</a></li>
+                        <li><a href="#">+1 (888) 888-8888</a></li>
+                        <li><a href="#">Enterprise Solutions</a></li>
+                        <li><a href="#">Press Inquiries</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2023 Study Buddy Finder. All rights reserved. | Transforming education through AI-powered collaboration.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript for Vanta.js and Animations -->
+    <script>
+        // Initialize Vanta.js with NET effect
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x6c63ff,
+            backgroundColor: 0x080518,
+            points: 12.00,
+            maxDistance: 25.00,
+            spacing: 18.00
+        });
+
+        // Scroll animation for elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = `fadeInUp 0.8s ease forwards`;
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            // Observe feature cards
+            document.querySelectorAll('.feature-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Observe testimonial cards
+            document.querySelectorAll('.testimonial-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Observe CTA section
+            const ctaSection = document.querySelector('.cta-section');
+            if (ctaSection) {
+                observer.observe(ctaSection);
+            }
+            
+            // Floating button effects
+            const buttons = document.querySelectorAll('.cta-button, .secondary-button');
+            buttons.forEach(button => {
+                button.addEventListener('mousemove', (e) => {
+                    const rect = button.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    button.style.setProperty('--x', `${x}px`);
+                    button.style.setProperty('--y', `${y}px`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
